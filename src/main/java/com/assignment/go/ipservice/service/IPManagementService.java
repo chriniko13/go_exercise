@@ -1,6 +1,7 @@
 package com.assignment.go.ipservice.service;
 
 import com.assignment.go.ipservice.dto.BlacklistIpRequest;
+import com.assignment.go.ipservice.dto.FreeIpRequest;
 import com.assignment.go.ipservice.dto.ReserveIpRequest;
 import com.assignment.go.ipservice.dto.ReserveIpsRequest;
 import com.assignment.go.ipservice.entity.IPAddress;
@@ -96,6 +97,11 @@ public class IPManagementService {
 
 	}
 
+	@Transactional
+	public void free(FreeIpRequest request) {
+		//TODO...
+	}
+
 	// --- infra ---
 
 	private Set<IPAddress> calculate(long ipPoolId, IPPool ipPool, long numberOfIps, Set<String> reservedOrBlacklistedIpAddressValues) {
@@ -106,13 +112,7 @@ public class IPManagementService {
 			 walker <= ipPool.getUpperBoundAsNum() && result.size() != numberOfIps;
 			 walker++) {
 
-			final String ipValue;
-			try {
-				ipValue = InetAddress.getByName(String.valueOf(walker)).getHostAddress();
-			} catch (Exception e) {
-				LOG.error("invalid ip value, message: " + e.getMessage(), e);
-				throw new InfrastructureException(e);
-			}
+			final String ipValue = numToIpAddress(walker);
 
 			if (reservedOrBlacklistedIpAddressValues.contains(ipValue)) { // O(1)
 				continue;
@@ -138,5 +138,16 @@ public class IPManagementService {
 			throw new IpValueNotWithinIpPoolRangeException();
 		}
 		return ipPool;
+	}
+
+	private String numToIpAddress(long walker) {
+		final String ipValue;
+		try {
+			ipValue = InetAddress.getByName(String.valueOf(walker)).getHostAddress();
+		} catch (Exception e) {
+			LOG.error("invalid ip value, message: " + e.getMessage(), e);
+			throw new InfrastructureException(e);
+		}
+		return ipValue;
 	}
 }

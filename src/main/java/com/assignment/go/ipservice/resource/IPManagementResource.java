@@ -1,6 +1,7 @@
 package com.assignment.go.ipservice.resource;
 
 import com.assignment.go.ipservice.dto.BlacklistIpRequest;
+import com.assignment.go.ipservice.dto.FreeIpRequest;
 import com.assignment.go.ipservice.dto.ReserveIpRequest;
 import com.assignment.go.ipservice.dto.ReserveIpsRequest;
 import com.assignment.go.ipservice.dto.ReserveIpsResult;
@@ -53,6 +54,13 @@ public class IPManagementResource {
 		reserveIpRequestValidator.process(new ReserveIpRequest(request.getIpPoolId()));
 		ipManagementService.blacklist(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(null);
+	}
+
+	@RequestMapping(path = "ip-address/free", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public HttpEntity<Void> freeIp(@RequestBody FreeIpRequest request) {
+		//TODO validation....
+		ipManagementService.free(request);
+		return ResponseEntity.status(HttpStatus.OK).body(null);
 	}
 
 }
