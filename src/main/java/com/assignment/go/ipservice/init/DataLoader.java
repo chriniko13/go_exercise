@@ -53,6 +53,8 @@ public class DataLoader {
 
 			});
 
+			ipPools.forEach(IPPool::initCapacities);
+
 			transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
 				@Override protected void doInTransactionWithoutResult(TransactionStatus status) {
