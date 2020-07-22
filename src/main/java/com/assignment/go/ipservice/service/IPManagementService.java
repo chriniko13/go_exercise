@@ -10,6 +10,7 @@ import com.assignment.go.ipservice.entity.IPPool;
 import com.assignment.go.ipservice.error.InfrastructureException;
 import com.assignment.go.ipservice.error.IpBlacklistedException;
 import com.assignment.go.ipservice.error.IpReservedException;
+import com.assignment.go.ipservice.error.IpValueNotReservedOrBlacklistedException;
 import com.assignment.go.ipservice.error.IpValueNotWithinIpPoolRangeException;
 import com.assignment.go.ipservice.repository.IPAddressRepository;
 import com.assignment.go.ipservice.repository.IPPoolRepository;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.InetAddress;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -84,29 +86,49 @@ public class IPManagementService {
 
 		IPPool ipPool = ifIpInRangeGetPool(ipPoolId, ipValue);
 
-		ipAddressRepository.findByValueEquals(ipValue).ifPresent(rec -> {
-			if (rec.getState() == IPAddressState.RESERVED) {
+		Optional<IPAddress> recordHolder = ipAddressRepository.findByValueEquals(ipValue);
+
+		if (recordHolder.isPresent()) {
+
+			IPAddress record = recordHolder.get();
+			if (record.getState() == IPAddressState.RESERVED) {
 				throw new IpReservedException();
 			}
 
-			if (rec.getState() != IPAddressState.BLACKLISTED) {
-				ipPool.increaseUsedCapacity(1);
-				ipAddressRepository.save(IPAddress.createBlacklisted(ipPoolId, ipValue));
-			}
-		});
+			// Note: we ignore if it is already blacklist (respond ok)
 
+		} else {
+			ipPool.increaseUsedCapacity(1);
+			ipAddressRepository.save(IPAddress.createBlacklisted(ipPoolId, ipValue));
+		}
 	}
 
 	@Transactional
 	public void free(FreeIpRequest request) {
-		//TODO...
+
+		long ipPoolId = request.getIpPoolId();
+		String ipValue = request.getIpValue();
+
+		IPPool ipPool = ifIpInRangeGetPool(ipPoolId, ipValue);
+
+		Optional<IPAddress> recordHolder = ipAddressRepository.findByValueEquals(ipValue);
+		if (recordHolder.isPresent()) {
+
+			Long ipAddressRecordId = recordHolder.get().getId();
+			ipAddressRepository.deleteById(ipAddressRecordId);
+			ipPool.decreaseUsedCapacity(1);
+
+		} else {
+			throw new IpValueNotReservedOrBlacklistedException();
+		}
+
 	}
 
 	// --- infra ---
 
 	private Set<IPAddress> calculate(long ipPoolId, IPPool ipPool, long numberOfIps, Set<String> reservedOrBlacklistedIpAddressValues) {
 
-		Set<IPAddress> result = new LinkedHashSet<>();
+		final Set<IPAddress> result = new LinkedHashSet<>();
 
 		for (long walker = ipPool.getLowerBoundAsNum();
 			 walker <= ipPool.getUpperBoundAsNum() && result.size() != numberOfIps;

@@ -8,6 +8,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -34,6 +36,7 @@ public class IPAddress {
 
 	//TODO valueAsInteger
 
+	@Enumerated(EnumType.STRING)
 	private IPAddressState state;
 
 	public static IPAddress createReserved(Long ipPoolId, String value) {

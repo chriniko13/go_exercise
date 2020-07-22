@@ -3,6 +3,7 @@ package com.assignment.go.ipservice.resource;
 import com.assignment.go.ipservice.error.InvalidPoolIdProvidedException;
 import com.assignment.go.ipservice.error.IpBlacklistedException;
 import com.assignment.go.ipservice.error.IpReservedException;
+import com.assignment.go.ipservice.error.IpValueNotReservedOrBlacklistedException;
 import com.assignment.go.ipservice.error.IpValueNotWithinIpPoolRangeException;
 import com.assignment.go.ipservice.error.NotAvailableIpResourcesException;
 import com.assignment.go.ipservice.error.ValidationErrorMessage;
@@ -55,6 +56,14 @@ public class RestResponseEntityExceptionHandler {
 		ValidationErrorMessage message = new ValidationErrorMessage("ip value provided is blacklisted");
 
 		return new ResponseEntity<>(new ValidationErrorMessages(Collections.singletonList(message)), HttpStatus.CONFLICT);
+	}
+
+	@ExceptionHandler(IpValueNotReservedOrBlacklistedException.class)
+	public ResponseEntity<Object> handle(IpValueNotReservedOrBlacklistedException e) {
+
+		ValidationErrorMessage message = new ValidationErrorMessage("ip value provided is not reserved or blacklisted in order to free it");
+
+		return new ResponseEntity<>(new ValidationErrorMessages(Collections.singletonList(message)), HttpStatus.BAD_REQUEST);
 	}
 
 }

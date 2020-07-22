@@ -76,4 +76,8 @@ public class IPPool {
 	public void increaseUsedCapacity(int size) {
 		this.usedCapacity += size;
 	}
+
+	public void decreaseUsedCapacity(int size) {
+		this.usedCapacity -= size;
+	}
 }
