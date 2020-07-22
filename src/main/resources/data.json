@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "description": "Static - IP Block 1",
+    "lowerBound": "10.70.26.1",
+    "upperBound": "10.70.26.100"
+  },
+  {
+    "id": 2,
+    "description": "Static - IP Block 2",
+    "lowerBound": "10.70.25.0",
+    "upperBound": "10.70.25.255"
+  },
+  {
+    "id": 3,
+    "description": "Dynamic - IP Block 3",
+    "lowerBound": "10.50.0.0",
+    "upperBound": "10.50.255.255"
+  }
+]
