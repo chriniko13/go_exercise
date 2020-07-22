@@ -5,6 +5,7 @@ import com.assignment.go.ipservice.dto.ReserveIpsRequest;
 import com.assignment.go.ipservice.dto.ReserveIpsResult;
 import com.assignment.go.ipservice.entity.IPAddress;
 import com.assignment.go.ipservice.service.IPManagementService;
+import com.assignment.go.ipservice.validator.ReserveIpRequestValidator;
 import com.assignment.go.ipservice.validator.ReserveIpsRequestValidator;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -21,11 +22,13 @@ import java.util.Set;
 public class IPManagementResource {
 
 	private final ReserveIpsRequestValidator reserveIpsRequestValidator;
+	private final ReserveIpRequestValidator reserveIpRequestValidator;
 	private final IPManagementService ipManagementService;
 
-	public IPManagementResource(IPManagementService ipManagementService, ReserveIpsRequestValidator reserveIpsRequestValidator) {
+	public IPManagementResource(IPManagementService ipManagementService, ReserveIpsRequestValidator reserveIpsRequestValidator, ReserveIpRequestValidator reserveIpRequestValidator) {
 		this.ipManagementService = ipManagementService;
 		this.reserveIpsRequestValidator = reserveIpsRequestValidator;
+		this.reserveIpRequestValidator = reserveIpRequestValidator;
 	}
 
 	@RequestMapping(path = "ip-addresses", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -39,9 +42,7 @@ public class IPManagementResource {
 
 	@RequestMapping(path = "ip-address", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public HttpEntity<Void> reserveIp(@RequestBody ReserveIpRequest request) {
-
-		//TODO validate ipPoolId is correct...
-
+		reserveIpRequestValidator.process(request);
 		ipManagementService.reserve(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(null);
 	}
