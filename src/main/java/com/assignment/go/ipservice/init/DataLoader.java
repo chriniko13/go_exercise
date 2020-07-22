@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -21,11 +20,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class DataLoader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DataLoader.class);
+
+	private static final String DATA_JSON = "data.json";
 
 	private final ObjectMapper objectMapper;
 	private final IPPoolRepository ipPoolRepository;
@@ -41,9 +43,9 @@ public class DataLoader {
 	void init() {
 
 		try {
-			URL resource = this.getClass().getClassLoader().getResource("data.json");
+			URL resource = this.getClass().getClassLoader().getResource(DATA_JSON);
 
-			Path path = Paths.get(resource.toURI());
+			Path path = Paths.get(Objects.requireNonNull(resource).toURI());
 
 			List<String> lines = Files.readAllLines(path);
 
