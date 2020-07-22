@@ -25,8 +25,6 @@ import java.util.Set;
 @RestController
 public class IPManagementResource {
 
-	//TODO all validators should validate value of ip x.x.x.x
-
 	private final ReserveIpsRequestValidator reserveIpsRequestValidator;
 	private final ReserveIpRequestValidator reserveIpRequestValidator;
 	private final IPManagementService ipManagementService;
@@ -44,6 +42,7 @@ public class IPManagementResource {
 
 		reserveIpsRequestValidator.process(request);
 		Set<IPAddress> reservedIps = ipManagementService.reserve(request);
+
 		ReserveIpsResult result = new ReserveIpsResult(reservedIps);
 		return ResponseEntity.status(HttpStatus.CREATED).body(result);
 	}
@@ -52,8 +51,10 @@ public class IPManagementResource {
 			method = RequestMethod.POST,
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public HttpEntity<Void> reserveIp(@RequestBody ReserveIpRequest request) {
+
 		reserveIpRequestValidator.process(request);
 		ipManagementService.reserve(request);
+
 		return ResponseEntity.status(HttpStatus.CREATED).body(null);
 	}
 
@@ -61,8 +62,10 @@ public class IPManagementResource {
 			method = RequestMethod.POST,
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public HttpEntity<Void> blacklistIp(@RequestBody BlacklistIpRequest request) {
-		reserveIpRequestValidator.process(new ReserveIpRequest(request.getIpPoolId()));
+
+		reserveIpRequestValidator.process(new ReserveIpRequest(request.getIpPoolId(), request.getIpValue()));
 		ipManagementService.blacklist(request);
+
 		return ResponseEntity.status(HttpStatus.CREATED).body(null);
 	}
 
@@ -70,8 +73,10 @@ public class IPManagementResource {
 			method = RequestMethod.POST,
 			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public HttpEntity<Void> freeIp(@RequestBody FreeIpRequest request) {
-		reserveIpRequestValidator.process(new ReserveIpRequest(request.getIpPoolId()));
+
+		reserveIpRequestValidator.process(new ReserveIpRequest(request.getIpPoolId(), request.getIpValue()));
 		ipManagementService.free(request);
+
 		return ResponseEntity.status(HttpStatus.OK).body(null);
 	}
 
@@ -82,9 +87,9 @@ public class IPManagementResource {
 			@PathVariable("ipAddress") String ipAddress,
 			@RequestParam(value = "ipPoolId", required = true) long ipPoolId) {
 
-		//TODO validation....
-
+		reserveIpRequestValidator.process(new ReserveIpRequest(ipPoolId, ipAddress));
 		IPAddress address = ipManagementService.retrieve(ipAddress, ipPoolId);
+
 		return ResponseEntity.ok(address);
 	}
 
