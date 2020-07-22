@@ -4,8 +4,6 @@ import com.assignment.go.ipservice.dto.ReserveIpsRequest;
 import com.assignment.go.ipservice.entity.IPAddress;
 import com.assignment.go.ipservice.entity.IPPool;
 import com.assignment.go.ipservice.error.InfrastructureException;
-import com.assignment.go.ipservice.error.InvalidPoolIdProvidedException;
-import com.assignment.go.ipservice.error.NotAvailableIpResourcesException;
 import com.assignment.go.ipservice.repository.IPAddressRepository;
 import com.assignment.go.ipservice.repository.IPPoolRepository;
 import org.slf4j.Logger;
@@ -35,13 +33,9 @@ public class IPManagementService {
 	public Set<IPAddress> reserve(ReserveIpsRequest req) {
 
 		long ipPoolId = req.getIpPoolId();
-
-		IPPool ipPool = ipPoolRepository.findById(ipPoolId).orElseThrow(InvalidPoolIdProvidedException::new);
+		IPPool ipPool = ipPoolRepository.findById(ipPoolId).orElseThrow(IllegalStateException::new);
 
 		long numberOfIps = req.getNumberOfIps();
-		if (numberOfIps > (ipPool.getTotalCapacity() - ipPool.getUsedCapacity())) {
-			throw new NotAvailableIpResourcesException();
-		}
 
 		Set<String> reservedOrBlacklistedIpAddressValues = getReservedOrBlacklistedIpValues(ipPool);
 
@@ -69,7 +63,7 @@ public class IPManagementService {
 				throw new InfrastructureException(e);
 			}
 
-			if (reservedOrBlacklistedIpAddressValues.contains(ipValue)) {
+			if (reservedOrBlacklistedIpAddressValues.contains(ipValue)) { // O(1)
 				continue;
 			}
 

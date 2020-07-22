@@ -31,6 +31,8 @@ public class IPAddress {
 
 	private String value;
 
+	//TODO valueAsInteger
+
 	private IPAddressState state;
 
 	public static IPAddress createReserved(Long ipPoolId, String value) {
