@@ -13,15 +13,19 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
 
 @RestController
 public class IPManagementResource {
+
+	//TODO all validators should validate value of ip x.x.x.x
 
 	private final ReserveIpsRequestValidator reserveIpsRequestValidator;
 	private final ReserveIpRequestValidator reserveIpRequestValidator;
@@ -33,7 +37,9 @@ public class IPManagementResource {
 		this.reserveIpRequestValidator = reserveIpRequestValidator;
 	}
 
-	@RequestMapping(path = "ip-addresses", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path = "ip-addresses",
+			method = RequestMethod.POST,
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public HttpEntity<ReserveIpsResult> reserveIps(@RequestBody ReserveIpsRequest request) {
 
 		reserveIpsRequestValidator.process(request);
@@ -42,25 +48,44 @@ public class IPManagementResource {
 		return ResponseEntity.status(HttpStatus.CREATED).body(result);
 	}
 
-	@RequestMapping(path = "ip-address/reserve", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path = "ip-address/reserve",
+			method = RequestMethod.POST,
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public HttpEntity<Void> reserveIp(@RequestBody ReserveIpRequest request) {
 		reserveIpRequestValidator.process(request);
 		ipManagementService.reserve(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(null);
 	}
 
-	@RequestMapping(path = "ip-address/blacklist", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path = "ip-address/blacklist",
+			method = RequestMethod.POST,
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public HttpEntity<Void> blacklistIp(@RequestBody BlacklistIpRequest request) {
 		reserveIpRequestValidator.process(new ReserveIpRequest(request.getIpPoolId()));
 		ipManagementService.blacklist(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(null);
 	}
 
-	@RequestMapping(path = "ip-address/free", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path = "ip-address/free",
+			method = RequestMethod.POST,
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public HttpEntity<Void> freeIp(@RequestBody FreeIpRequest request) {
 		reserveIpRequestValidator.process(new ReserveIpRequest(request.getIpPoolId()));
 		ipManagementService.free(request);
 		return ResponseEntity.status(HttpStatus.OK).body(null);
+	}
+
+	@RequestMapping(path = "ip-addresses/{ipAddress}",
+			method = RequestMethod.GET,
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public HttpEntity<IPAddress> retrieve(
+			@PathVariable("ipAddress") String ipAddress,
+			@RequestParam(value = "ipPoolId", required = true) long ipPoolId) {
+
+		//TODO validation....
+
+		IPAddress address = ipManagementService.retrieve(ipAddress, ipPoolId);
+		return ResponseEntity.ok(address);
 	}
 
 }

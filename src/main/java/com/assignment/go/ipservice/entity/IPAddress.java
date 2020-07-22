@@ -50,4 +50,8 @@ public class IPAddress {
 	public static IPAddress createBlacklisted(long ipPoolId, String value) {
 		return new IPAddress(null, ipPoolId, value, IPAddressState.BLACKLISTED);
 	}
+
+	public static IPAddress createFree(long ipPoolId, String value) {
+		return new IPAddress(null, ipPoolId, value, IPAddressState.FREE);
+	}
 }

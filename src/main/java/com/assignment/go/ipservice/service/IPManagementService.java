@@ -124,6 +124,15 @@ public class IPManagementService {
 
 	}
 
+	@Transactional(readOnly = true)
+	public IPAddress retrieve(String ipValue, long ipPoolId) {
+
+		ifIpInRangeGetPool(ipPoolId, ipValue);
+
+		return ipAddressRepository.findByValueEquals(ipValue)
+				.orElseGet(() -> IPAddress.createFree(ipPoolId, ipValue));
+	}
+
 	// --- infra ---
 
 	private Set<IPAddress> calculate(long ipPoolId, IPPool ipPool, long numberOfIps, Set<String> reservedOrBlacklistedIpAddressValues) {
