@@ -26,9 +26,10 @@ public class IPAddress {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-
+	// TODO index...
 	private Long ipPoolId;
 
+	// TODO index...
 	private String value;
 
 	//TODO valueAsInteger

@@ -39,7 +39,7 @@ class IPManagementServiceTest {
 	}
 
 	@Test
-	void reserve_works_as_expected_reserved() {
+	void reserve_ReserveIpsRequest_works_as_expected_reserved() {
 
 		// given (let's reserve some)
 		ReserveIpsRequest req = new ReserveIpsRequest();
@@ -71,7 +71,7 @@ class IPManagementServiceTest {
 	}
 
 	@Test
-	void reserve_works_as_expected_not_reserved() {
+	void reserve_ReserveIpsRequest_works_as_expected_not_reserved() {
 
 		// given
 		ReserveIpsRequest req = new ReserveIpsRequest();

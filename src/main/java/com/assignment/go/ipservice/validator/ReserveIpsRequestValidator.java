@@ -6,6 +6,7 @@ import com.assignment.go.ipservice.error.InvalidPoolIdProvidedException;
 import com.assignment.go.ipservice.error.NotAvailableIpResourcesException;
 import com.assignment.go.ipservice.repository.IPPoolRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ReserveIpsRequestValidator implements Validator<ReserveIpsRequest, Void> {
@@ -16,6 +17,7 @@ public class ReserveIpsRequestValidator implements Validator<ReserveIpsRequest, 
 		this.ipPoolRepository = ipPoolRepository;
 	}
 
+	@Transactional(readOnly = true)
 	@Override public Void process(ReserveIpsRequest input) {
 
 		long ipPoolId = input.getIpPoolId();

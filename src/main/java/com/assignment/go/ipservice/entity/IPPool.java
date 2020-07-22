@@ -64,4 +64,16 @@ public class IPPool {
 		return ipToLong(upperBound);
 	}
 
+	public boolean isInRange(String ipValue) {
+		long l = getLowerBoundAsNum();
+		long h = getUpperBoundAsNum();
+
+		long toCheck = ipToLong(ipValue);
+
+		return toCheck >= l && toCheck <= h;
+	}
+
+	public void increaseUsedCapacity(int size) {
+		this.usedCapacity += size;
+	}
 }

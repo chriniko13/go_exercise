@@ -1,9 +1,13 @@
 package com.assignment.go.ipservice.service;
 
+import com.assignment.go.ipservice.dto.ReserveIpRequest;
 import com.assignment.go.ipservice.dto.ReserveIpsRequest;
 import com.assignment.go.ipservice.entity.IPAddress;
 import com.assignment.go.ipservice.entity.IPPool;
 import com.assignment.go.ipservice.error.InfrastructureException;
+import com.assignment.go.ipservice.error.IpBlacklistedException;
+import com.assignment.go.ipservice.error.IpReservedException;
+import com.assignment.go.ipservice.error.IpValueNotWithinIpPoolRangeException;
 import com.assignment.go.ipservice.repository.IPAddressRepository;
 import com.assignment.go.ipservice.repository.IPPoolRepository;
 import org.slf4j.Logger;
@@ -41,11 +45,39 @@ public class IPManagementService {
 
 		Set<IPAddress> reserved = calculate(ipPoolId, ipPool, numberOfIps, reservedOrBlacklistedIpAddressValues);
 
-		ipPool.setUsedCapacity(ipPool.getUsedCapacity() + reserved.size());
+		ipPool.increaseUsedCapacity(reserved.size());
 		ipAddressRepository.saveAll(reserved);
 
 		return reserved;
 	}
+
+	@Transactional
+	public void reserve(ReserveIpRequest req) {
+
+		long ipPoolId = req.getIpPoolId();
+		String ipValue = req.getIpValue();
+
+		IPPool ipPool = ipPoolRepository.findById(ipPoolId).orElseThrow(IllegalStateException::new);
+
+		if (!ipPool.isInRange(ipValue)) {
+			throw new IpValueNotWithinIpPoolRangeException();
+		}
+
+		ipAddressRepository.findByValueEquals(ipValue).ifPresent(rec -> {
+			switch (rec.getState()) {
+				case RESERVED:
+					throw new IpReservedException();
+
+				case BLACKLISTED:
+					throw new IpBlacklistedException();
+			}
+		});
+
+		ipPool.increaseUsedCapacity(1);
+		ipAddressRepository.save(IPAddress.createReserved(ipPoolId, ipValue));
+	}
+
+	// --- infra ---
 
 	private Set<IPAddress> calculate(long ipPoolId, IPPool ipPool, long numberOfIps, Set<String> reservedOrBlacklistedIpAddressValues) {
 
