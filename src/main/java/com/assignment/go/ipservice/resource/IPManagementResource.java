@@ -58,7 +58,7 @@ public class IPManagementResource {
 
 	@RequestMapping(path = "ip-address/free", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public HttpEntity<Void> freeIp(@RequestBody FreeIpRequest request) {
-		//TODO validation....
+		reserveIpRequestValidator.process(new ReserveIpRequest(request.getIpPoolId()));
 		ipManagementService.free(request);
 		return ResponseEntity.status(HttpStatus.OK).body(null);
 	}
