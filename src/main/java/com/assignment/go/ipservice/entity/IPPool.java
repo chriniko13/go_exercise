@@ -12,6 +12,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import java.net.InetAddress;
 
 @Getter
@@ -22,13 +24,17 @@ import java.net.InetAddress;
 @ToString
 
 @Entity
+@Table(indexes = {
+
+		@Index(name = "UNIQUE_DESCRIPTION", columnList = "description", unique = true)
+
+})
 public class IPPool {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-	//TODO add unique
 	private String description;
 
 	private Long totalCapacity;

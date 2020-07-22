@@ -13,6 +13,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
 
 @Getter
 @Setter
@@ -22,19 +24,21 @@ import javax.persistence.Id;
 @ToString
 
 @Entity
+@Table(indexes = {
+
+		@Index(name = "IDX_IP_POOL_ID", columnList = "ipPoolId"),
+		@Index(name = "UNIQUE_IDX_VALUE", columnList = "value", unique = true)
+
+})
 public class IPAddress {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-	// TODO index...
 	private Long ipPoolId;
 
-	// TODO index...
 	private String value;
-
-	//TODO valueAsInteger
 
 	@Enumerated(EnumType.STRING)
 	private IPAddressState state;
