@@ -1,5 +1,6 @@
 package com.assignment.go.ipservice.resource;
 
+import com.assignment.go.ipservice.dto.BlacklistIpRequest;
 import com.assignment.go.ipservice.dto.ReserveIpRequest;
 import com.assignment.go.ipservice.dto.ReserveIpsRequest;
 import com.assignment.go.ipservice.dto.ReserveIpsResult;
@@ -40,10 +41,17 @@ public class IPManagementResource {
 		return ResponseEntity.status(HttpStatus.CREATED).body(result);
 	}
 
-	@RequestMapping(path = "ip-address", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path = "ip-address/reserve", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public HttpEntity<Void> reserveIp(@RequestBody ReserveIpRequest request) {
 		reserveIpRequestValidator.process(request);
 		ipManagementService.reserve(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(null);
+	}
+
+	@RequestMapping(path = "ip-address/blacklist", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public HttpEntity<Void> blacklistIp(@RequestBody BlacklistIpRequest request) {
+		reserveIpRequestValidator.process(new ReserveIpRequest(request.getIpPoolId()));
+		ipManagementService.blacklist(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(null);
 	}
 

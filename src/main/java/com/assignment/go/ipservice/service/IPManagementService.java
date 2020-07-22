@@ -1,8 +1,10 @@
 package com.assignment.go.ipservice.service;
 
+import com.assignment.go.ipservice.dto.BlacklistIpRequest;
 import com.assignment.go.ipservice.dto.ReserveIpRequest;
 import com.assignment.go.ipservice.dto.ReserveIpsRequest;
 import com.assignment.go.ipservice.entity.IPAddress;
+import com.assignment.go.ipservice.entity.IPAddressState;
 import com.assignment.go.ipservice.entity.IPPool;
 import com.assignment.go.ipservice.error.InfrastructureException;
 import com.assignment.go.ipservice.error.IpBlacklistedException;
@@ -57,11 +59,7 @@ public class IPManagementService {
 		long ipPoolId = req.getIpPoolId();
 		String ipValue = req.getIpValue();
 
-		IPPool ipPool = ipPoolRepository.findById(ipPoolId).orElseThrow(IllegalStateException::new);
-
-		if (!ipPool.isInRange(ipValue)) {
-			throw new IpValueNotWithinIpPoolRangeException();
-		}
+		IPPool ipPool = ifIpInRangeGetPool(ipPoolId, ipValue);
 
 		ipAddressRepository.findByValueEquals(ipValue).ifPresent(rec -> {
 			switch (rec.getState()) {
@@ -75,6 +73,27 @@ public class IPManagementService {
 
 		ipPool.increaseUsedCapacity(1);
 		ipAddressRepository.save(IPAddress.createReserved(ipPoolId, ipValue));
+	}
+
+	@Transactional
+	public void blacklist(BlacklistIpRequest request) {
+
+		long ipPoolId = request.getIpPoolId();
+		String ipValue = request.getIpValue();
+
+		IPPool ipPool = ifIpInRangeGetPool(ipPoolId, ipValue);
+
+		ipAddressRepository.findByValueEquals(ipValue).ifPresent(rec -> {
+			if (rec.getState() == IPAddressState.RESERVED) {
+				throw new IpReservedException();
+			}
+
+			if (rec.getState() != IPAddressState.BLACKLISTED) {
+				ipPool.increaseUsedCapacity(1);
+				ipAddressRepository.save(IPAddress.createBlacklisted(ipPoolId, ipValue));
+			}
+		});
+
 	}
 
 	// --- infra ---
@@ -112,4 +131,12 @@ public class IPManagementService {
 				.collect(Collectors.toSet());
 	}
 
+	private IPPool ifIpInRangeGetPool(long ipPoolId, String ipValue) {
+		IPPool ipPool = ipPoolRepository.findById(ipPoolId).orElseThrow(IllegalStateException::new);
+
+		if (!ipPool.isInRange(ipValue)) {
+			throw new IpValueNotWithinIpPoolRangeException();
+		}
+		return ipPool;
+	}
 }

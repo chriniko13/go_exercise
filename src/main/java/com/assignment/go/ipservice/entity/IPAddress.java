@@ -16,7 +16,7 @@ import javax.persistence.Id;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"value"})
+@EqualsAndHashCode(of = { "value" })
 @ToString
 
 @Entity
@@ -40,5 +40,7 @@ public class IPAddress {
 		return new IPAddress(null, ipPoolId, value, IPAddressState.RESERVED);
 	}
 
-
+	public static IPAddress createBlacklisted(long ipPoolId, String value) {
+		return new IPAddress(null, ipPoolId, value, IPAddressState.BLACKLISTED);
+	}
 }

@@ -7,13 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ReserveIpRequest {
+public class BlacklistIpRequest {
 
 	private long ipPoolId;
 	private String ipValue;
-
-	public ReserveIpRequest(long ipPoolId) {
-		this.ipPoolId = ipPoolId;
-	}
 
 }
